@@ -14,13 +14,13 @@ import open from "open";
 import { SearchResult } from "./utils/types";
 
 interface ExtensionPreferences {
-  kagiToken: string;
+  token: string;
 }
 
 export default function Command() {
-  const { kagiToken }: ExtensionPreferences = getPreferenceValues();
+  const { token }: ExtensionPreferences = getPreferenceValues();
   const { isLoading, history, results, searchText, search, addHistory, deleteAllHistory, deleteHistoryItem } =
-    useSearch(kagiToken);
+    useSearch(token);
 
   const listItems: SearchResult[] = searchText.length === 0 ? history : results;
 
