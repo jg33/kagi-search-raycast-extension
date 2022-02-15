@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Kagi Search",
+      "title": "Search Kagi",
       "description": "Kagi search with autosuggestions",
       "mode": "view"
     }
