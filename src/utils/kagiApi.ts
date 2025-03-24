@@ -55,6 +55,7 @@ export async function searchWithKagiAPI(
         query: item.title,
         description: item.snippet || "",
         url: item.url,
+        isApiResult: true,
       });
     }
   });

@@ -6,9 +6,8 @@ export interface SearchResult {
   url: string;
   isNavigation?: boolean;
   isHistory?: boolean;
-  isApiResult?: boolean;
-  isAnswer?: boolean;
-  isReference?: boolean;
+  isApiResult?: boolean;  // Add this to identify API search results
+  content?: string;       // For storing API response content
 }
 
 export const HISTORY_KEY = "history";

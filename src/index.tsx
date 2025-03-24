@@ -1,4 +1,3 @@
-// src/index.tsx
 import {
   ActionPanel,
   closeMainWindow,
@@ -27,7 +26,7 @@ export default function Command() {
     results,
     searchText,
     search,
-    searchWithAPI,
+    searchWithApi,
     addHistory,
     deleteAllHistory,
     deleteHistoryItem
@@ -52,26 +51,53 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <ActionPanel.Section title="Result">
-                  <ActionPanel.Item
-                    title="Open in Browser"
-                    onAction={async () => {
-                      await addHistory(item);
-                      await open(item.url);
-                      await closeMainWindow();
-                    }}
-                    icon={{ source: Icon.ArrowRight }}
-                  />
-
-                  <CopyToClipboardAction title="Copy URL to Clipboard" content={item.url} />
-
-                  {searchText.length > 0 && (
+                  {item.isApiResult ? (
+                    // For API results, default action is open in browser
+                    <ActionPanel.Item
+                      title="Open in Browser"
+                      onAction={async () => {
+                        await addHistory(item);
+                        await open(item.url);
+                        await closeMainWindow();
+                      }}
+                      icon={{ source: Icon.ArrowRight }}
+                    />
+                  ) : (
+                    // For auto-suggest results, default action is search with API
                     <ActionPanel.Item
                       title="Search with Kagi API"
+                      onAction={async () => {
+                        const apiResults = await searchWithApi(item.query);
+                        if (apiResults.length > 0) {
+                          await addHistory(item);
+                        }
+                      }}
                       icon={{ source: Icon.MagnifyingGlass }}
-                      onAction={() => searchWithAPI(searchText)}
-                      shortcut={{ modifiers: [], key: "return" }}
                     />
                   )}
+
+                  {/* Show the alternative action based on result type */}
+                  {item.isApiResult ? (
+                    <ActionPanel.Item
+                      title="Search Again"
+                      onAction={async () => {
+                        await searchWithApi(item.query);
+                      }}
+                      icon={{ source: Icon.MagnifyingGlass }}
+                    />
+                  ) : (
+                    <ActionPanel.Item
+                      title="Open in Browser"
+                      onAction={async () => {
+                        await addHistory(item);
+                        await open(item.url);
+                        await closeMainWindow();
+                      }}
+                      icon={{ source: Icon.ArrowRight }}
+                    />
+                  )}
+
+                  <CopyToClipboardAction title="Copy URL to Clipboard" content={item.url} />
                 </ActionPanel.Section>
 
                 <ActionPanel.Section title="History">

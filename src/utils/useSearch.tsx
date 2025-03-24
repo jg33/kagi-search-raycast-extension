@@ -13,8 +13,6 @@ export function useSearch(token: string, apiKey: string) {
   const [searchText, setSearchText] = useState("");
   const cancelRef = useRef<AbortController | null>(null);
 
-  console.log(apiKey);
-
   useEffect(() => {
     getHistory();
 
@@ -92,39 +90,30 @@ export function useSearch(token: string, apiKey: string) {
     }
   }
 
-  async function searchWithAPI(query: string) {
-    if (!query) {
-      showToast(ToastStyle.Failure, "Please enter a search query");
-      return;
-    }
-
+  async function searchWithApi(query: string) {
     cancelRef.current?.abort();
     cancelRef.current = new AbortController();
 
     try {
       setIsLoading(true);
-      const apiResults = await searchWithKagiAPI(query, apiKey, cancelRef.current.signal);
-      setResults(apiResults);
-      setIsLoading(false);
 
-      // Add search to history
-      if (apiResults.length > 0) {
-        const historyItem: SearchResult = {
-          id: apiResults[0].id,
-          query: query,
-          description: `Search for '${query}'`,
-          url: `https://kagi.com/search?q=${encodeURIComponent(query)}`,
-        };
-        await addHistory(historyItem);
+      let results: SearchResult[] = [];
+
+      if (query) {
+        results = await searchWithKagiAPI(query, apiKey, cancelRef.current.signal);
       }
+
+      setIsLoading(false);
+      setResults(results);
+      return results;
     } catch (error) {
       if (error instanceof AbortError) {
-        return;
+        return [];
       }
 
       console.error("API search error", error);
       showToast(ToastStyle.Failure, "Could not perform API search", String(error));
-      setIsLoading(false);
+      return [];
     }
   }
 
@@ -133,7 +122,7 @@ export function useSearch(token: string, apiKey: string) {
     results,
     searchText,
     search,
-    searchWithAPI,
+    searchWithApi,
     history,
     addHistory,
     deleteAllHistory,

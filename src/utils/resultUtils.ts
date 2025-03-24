@@ -6,9 +6,7 @@ export const getIcon = (item: SearchResult) => {
     return Icon.Clock;
   } else if (item.isNavigation) {
     return Icon.Link;
-  } else if (item.isAnswer) {
-    return Icon.Star;
-  } else if (item.isReference) {
+  } else if (item.isApiResult) {
     return Icon.Document;
   } else {
     return Icon.MagnifyingGlass;
