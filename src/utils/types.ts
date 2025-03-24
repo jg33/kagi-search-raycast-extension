@@ -6,8 +6,13 @@ export interface SearchResult {
   url: string;
   isNavigation?: boolean;
   isHistory?: boolean;
-  isApiResult?: boolean;  // Add this to identify API search results
-  content?: string;       // For storing API response content
+  isApiResult?: boolean;
+  content?: string;      // For storing response content
+  references?: {
+    title: string;
+    snippet: string;
+    url: string;
+  }[];
 }
 
 export const HISTORY_KEY = "history";

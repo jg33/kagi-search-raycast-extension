@@ -1,3 +1,4 @@
+// src/index.tsx
 import {
   ActionPanel,
   closeMainWindow,
@@ -7,11 +8,13 @@ import {
   List,
   showToast,
   ToastStyle,
+  Detail,
 } from "@raycast/api";
 import { getIcon } from "./utils/resultUtils";
 import { useSearch } from "./utils/useSearch";
 import open from "open";
 import { SearchResult } from "./utils/types";
+import { useState } from "react";
 
 interface ExtensionPreferences {
   token: string;
@@ -29,22 +32,69 @@ export default function Command() {
     searchWithApi,
     addHistory,
     deleteAllHistory,
-    deleteHistoryItem
+    deleteHistoryItem,
+    fastGPTResult,
+    isFastGPTLoading
   } = useSearch(token, apiKey);
 
   const listItems: SearchResult[] = searchText.length === 0 ? history : results;
+  // Fix: Use undefined instead of null
+  const [selectedItemId, setSelectedItemId] = useState<string | undefined>(undefined);
+
+  // Format FastGPT content for the side panel
+  const formatFastGPTContent = () => {
+    if (!fastGPTResult) return "";
+
+    let markdown = `# ${fastGPTResult.query}\n\n${fastGPTResult.content}\n\n`;
+
+    if (fastGPTResult.references && fastGPTResult.references.length > 0) {
+      markdown += "## References\n\n";
+
+      fastGPTResult.references.forEach((ref, index) => {
+        markdown += `${index + 1}. [${ref.title}](${ref.url})\n   ${ref.snippet}\n\n`;
+      });
+    }
+
+    return markdown;
+  };
 
   return (
     <List
       isLoading={isLoading}
       onSearchTextChange={search}
-      searchBarPlaceholder="Search Kagi or type a URL..."
+      searchBarPlaceholder="Search Kagi or type a URL... (end with ? for FastGPT)"
       throttle
+      selectedItemId={selectedItemId}
+      onSelectionChange={(id) => setSelectedItemId(id)}
+      isShowingDetail={!!fastGPTResult}
+      navigationTitle={searchText ? `Results for "${searchText}"` : "Kagi Search"}
+      detail={
+        fastGPTResult ? (
+          <Detail
+            isLoading={isFastGPTLoading}
+            markdown={formatFastGPTContent()}
+            actions={
+              <ActionPanel>
+                <ActionPanel.Item
+                  title="Open in Browser"
+                  onAction={async () => {
+                    await open(fastGPTResult.url);
+                    await closeMainWindow();
+                  }}
+                  icon={{ source: Icon.ArrowRight }}
+                />
+                <CopyToClipboardAction title="Copy Answer to Clipboard" content={fastGPTResult.content || ""} />
+              </ActionPanel>
+            }
+          />
+        ) : null
+      }
     >
       <List.Section title="Results" subtitle={listItems.length + ""}>
         {listItems.map((item) => (
           <List.Item
             key={item.id}
+            id={item.id}
             title={item.query}
             subtitle={item.description}
             icon={getIcon(item)}
@@ -68,7 +118,7 @@ export default function Command() {
                       title="Search with Kagi API"
                       onAction={async () => {
                         const apiResults = await searchWithApi(item.query);
-                        if (apiResults.length > 0) {
+                        if (apiResults && apiResults.length > 0) {
                           await addHistory(item);
                         }
                       }}

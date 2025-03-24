@@ -30,7 +30,6 @@ export async function searchWithKagiAPI(
   apiKey: string,
   signal: AbortSignal
 ): Promise<SearchResult[]> {
-  console.log(apiKey);
   const response = await fetch(`https://kagi.com/api/v0/search?q=${encodeURIComponent(query)}`, {
     method: "GET",
     signal: signal,
@@ -61,4 +60,56 @@ export async function searchWithKagiAPI(
   });
 
   return results;
+}
+
+interface FastGPTResponse {
+  data: {
+    output: string;
+    references: {
+      title: string;
+      snippet: string;
+      url: string;
+    }[];
+  };
+}
+
+// src/utils/kagiApi.ts - update the searchWithFastGPT function
+export async function searchWithFastGPT(
+  query: string,
+  apiKey: string,
+  signal: AbortSignal
+): Promise<SearchResult | undefined> {
+  try {
+    const response = await fetch("https://kagi.com/api/v0/fastgpt", {
+      method: "POST",
+      signal: signal,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bot ${apiKey}`,
+      },
+      body: JSON.stringify({
+        query: query,
+        web_search: true,
+      }),
+    });
+
+    if (!response.ok) {
+      return Promise.reject(response.statusText);
+    }
+
+    const data = await response.json() as FastGPTResponse;
+
+    // Create a result for the FastGPT answer
+    return {
+      id: randomId(),
+      query: query,
+      description: "FastGPT Answer",
+      url: `https://kagi.com/search?q=${encodeURIComponent(query)}`,
+      content: data.data.output,
+      references: data.data.references
+    };
+  } catch (error) {
+    console.error("FastGPT error:", error);
+    return undefined;
+  }
 }
