@@ -1,3 +1,4 @@
+// src/index.tsx
 import {
   ActionPanel,
   closeMainWindow,
@@ -15,12 +16,22 @@ import { SearchResult } from "./utils/types";
 
 interface ExtensionPreferences {
   token: string;
+  apiKey: string;
 }
 
 export default function Command() {
-  const { token }: ExtensionPreferences = getPreferenceValues();
-  const { isLoading, history, results, searchText, search, addHistory, deleteAllHistory, deleteHistoryItem } =
-    useSearch(token);
+  const { token, apiKey }: ExtensionPreferences = getPreferenceValues();
+  const {
+    isLoading,
+    history,
+    results,
+    searchText,
+    search,
+    searchWithAPI,
+    addHistory,
+    deleteAllHistory,
+    deleteHistoryItem
+  } = useSearch(token, apiKey);
 
   const listItems: SearchResult[] = searchText.length === 0 ? history : results;
 
@@ -52,6 +63,15 @@ export default function Command() {
                   />
 
                   <CopyToClipboardAction title="Copy URL to Clipboard" content={item.url} />
+
+                  {searchText.length > 0 && (
+                    <ActionPanel.Item
+                      title="Search with Kagi API"
+                      icon={{ source: Icon.MagnifyingGlass }}
+                      onAction={() => searchWithAPI(searchText)}
+                      shortcut={{ modifiers: [], key: "return" }}
+                    />
+                  )}
                 </ActionPanel.Section>
 
                 <ActionPanel.Section title="History">

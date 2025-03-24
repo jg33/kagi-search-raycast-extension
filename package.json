@@ -21,6 +21,13 @@
       "title": "Kagi Token",
       "description": "Please enter your Kagi token, which can be found at https://kagi.com/settings?p=user_details in your Session Link",
       "required": true
+    },
+    {
+      "name": "apiKey",
+      "title": "Kagi API Key",
+      "description": "Your Kagi API key from https://kagi.com/settings?p=api",
+      "type": "password",
+      "required": true
     }
   ],
   "dependencies": {

@@ -1,6 +1,8 @@
+// src/utils/handleResults.ts
 import { getLocalStorageItem, randomId } from "@raycast/api";
 import { SearchResult } from "./types";
 import fetch from "node-fetch";
+import { searchWithKagiAPI } from "./kagiApi";
 
 export async function getSearchHistory(): Promise<SearchResult[]> {
   const historyString = (await getLocalStorageItem("history")) as string;
@@ -54,4 +56,12 @@ export async function getSearchResults(
   });
 
   return results;
+}
+
+export async function performSearch(
+  searchText: string,
+  token: string,
+  signal: AbortSignal
+): Promise<SearchResult[]> {
+  return await searchWithKagiAPI(searchText, token, signal);
 }

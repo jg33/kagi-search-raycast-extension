@@ -1,15 +1,19 @@
+// src/utils/useSearch.tsx
 import { removeLocalStorageItem, setLocalStorageItem, showToast, ToastStyle } from "@raycast/api";
 import { AbortError } from "node-fetch";
 import { useState, useRef, useEffect } from "react";
 import { getSearchResults, getSearchHistory } from "./handleResults";
+import { searchWithKagiAPI } from "./kagiApi";
 import { SearchResult, HISTORY_KEY } from "./types";
 
-export function useSearch(token: string) {
+export function useSearch(token: string, apiKey: string) {
   const [isLoading, setIsLoading] = useState(true);
   const [history, setHistory] = useState<SearchResult[]>([]);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searchText, setSearchText] = useState("");
   const cancelRef = useRef<AbortController | null>(null);
+
+  console.log(apiKey);
 
   useEffect(() => {
     getHistory();
@@ -88,11 +92,48 @@ export function useSearch(token: string) {
     }
   }
 
+  async function searchWithAPI(query: string) {
+    if (!query) {
+      showToast(ToastStyle.Failure, "Please enter a search query");
+      return;
+    }
+
+    cancelRef.current?.abort();
+    cancelRef.current = new AbortController();
+
+    try {
+      setIsLoading(true);
+      const apiResults = await searchWithKagiAPI(query, apiKey, cancelRef.current.signal);
+      setResults(apiResults);
+      setIsLoading(false);
+
+      // Add search to history
+      if (apiResults.length > 0) {
+        const historyItem: SearchResult = {
+          id: apiResults[0].id,
+          query: query,
+          description: `Search for '${query}'`,
+          url: `https://kagi.com/search?q=${encodeURIComponent(query)}`,
+        };
+        await addHistory(historyItem);
+      }
+    } catch (error) {
+      if (error instanceof AbortError) {
+        return;
+      }
+
+      console.error("API search error", error);
+      showToast(ToastStyle.Failure, "Could not perform API search", String(error));
+      setIsLoading(false);
+    }
+  }
+
   return {
     isLoading,
     results,
     searchText,
     search,
+    searchWithAPI,
     history,
     addHistory,
     deleteAllHistory,
