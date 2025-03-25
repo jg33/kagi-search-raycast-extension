@@ -57,10 +57,11 @@ ${references.map((ref, index) => `${index + 1}. [${ref.title}](${ref.url})\n   $
       markdown={error ? `# Error\n\n${error}` : markdown}
       metadata={
         <Detail.Metadata>
+          <Detail.Metadata.Label title="References" text="" />
           {references.map((ref, index) => (
             <Detail.Metadata.Link
               key={`link-${index}`}
-              title={ref.title}
+              title={ref.url.split("/")[2]}
               text={ref.title}
               target={ref.url}
             />

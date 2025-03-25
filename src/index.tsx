@@ -88,6 +88,8 @@ export default function Command() {
                         // Set the states to switch to FastGPT view
                         setFastGPTQuery(item.query);
                         setShowFastGPTView(true);
+                        item.isFastGPT = true;
+                        await addHistory(item);
                       }}
                       icon={{ source: Icon.QuestionMark }}
                     />
