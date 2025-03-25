@@ -7,6 +7,7 @@ export interface SearchResult {
   isNavigation?: boolean;
   isHistory?: boolean;
   isApiResult?: boolean;
+  isFastGPT?: boolean;
   content?: string;      // For storing response content
   references?: {
     title: string;

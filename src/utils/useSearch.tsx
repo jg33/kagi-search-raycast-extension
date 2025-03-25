@@ -68,6 +68,7 @@ export function useSearch(token: string, apiKey: string) {
     showToast(ToastStyle.Success, "Removed from history");
   }
 
+  // In src/utils/useSearch.tsx
   async function search(query: string) {
     cancelRef.current?.abort();
     cancelRef.current = new AbortController();
@@ -80,8 +81,17 @@ export function useSearch(token: string, apiKey: string) {
       let results: SearchResult[] = [];
 
       if (query) {
-        results = await getSearchResults(query, token, cancelRef.current.signal);
+        // Check if query ends with a question mark to use FastGPT
+        if (query.trim().endsWith('?')) {
+          // Still get search results in background
+          results = await getSearchResults(query, token, cancelRef.current.signal);
+          setResults(results);
 
+          // Trigger FastGPT query
+          await queryFastGPT(query);
+        } else {
+          results = await getSearchResults(query, token, cancelRef.current.signal);
+        }
       }
 
       setIsLoading(false);
@@ -170,5 +180,6 @@ export function useSearch(token: string, apiKey: string) {
     deleteHistoryItem,
     fastGPTResult,
     isFastGPTLoading,
+    queryFastGPT
   };
 }

@@ -27,17 +27,9 @@ export default function FastGPTView(props: FastGPTViewProps) {
         const controller = new AbortController();
         const result = await searchWithFastGPT(props.query, apiKey, controller.signal);
 
-        if (result.length > 0) {
-          const mainResult = result[0];
-          setAnswer(mainResult.content || "");
-
-          // Extract references
-          const refs = result.slice(1).map(item => ({
-            title: item.query,
-            snippet: item.description || "",
-            url: item.url
-          }));
-          setReferences(refs);
+        if (result) {
+          setAnswer(result.content || "");
+          setReferences(result.references || []);
         }
       } catch (err) {
         console.error("Error fetching FastGPT answer:", err);
@@ -67,8 +59,8 @@ ${references.map((ref, index) => `${index + 1}. [${ref.title}](${ref.url})\n   $
         <Detail.Metadata>
           {references.map((ref, index) => (
             <Detail.Metadata.Link
-              key={index}
-              title={`Reference ${index + 1}`}
+              key={`link-${index}`}
+              title={ref.title}
               text={ref.title}
               target={ref.url}
             />
@@ -77,15 +69,17 @@ ${references.map((ref, index) => `${index + 1}. [${ref.title}](${ref.url})\n   $
       }
       actions={
         <ActionPanel>
-          <ActionPanel.OpenInBrowser
+          <ActionPanel.Item
             title="Search on Kagi"
-            url={`https://kagi.com/search?token=${token}&q=${encodeURIComponent(props.query)}`}
+            icon={{ source: Icon.MagnifyingGlass }}
+            onAction={() => open(`https://kagi.com/search?token=${token}&q=${encodeURIComponent(props.query)}`)}
           />
           {references.map((ref, index) => (
-            <ActionPanel.OpenInBrowser
+            <ActionPanel.Item
               key={index}
               title={`Open Reference ${index + 1}`}
-              url={ref.url}
+              icon={{ source: Icon.ArrowRight }}
+              onAction={() => open(ref.url)}
             />
           ))}
         </ActionPanel>
