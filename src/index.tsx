@@ -53,11 +53,6 @@ export default function Command() {
     return <FastGPTView query={fastGPTQuery} />;
   }
 
-  // If we have a question query and FastGPT result, show the FastGPT view
-  // if (isQuestionQuery && fastGPTResult) {
-  //   return <FastGPTView query={searchText} />;
-  // }
-
   return (
     <List
       isLoading={isLoading || isFastGPTLoading}
@@ -84,6 +79,7 @@ export default function Command() {
                     <ActionPanel.Item
                       title="Ask FastGPT"
                       onAction={async () => {
+                        console.log("on fastgpt action")
                         await queryFastGPT(item.query);
                         // Set the states to switch to FastGPT view
                         setFastGPTQuery(item.query);
@@ -93,9 +89,6 @@ export default function Command() {
                       }}
                       icon={{ source: Icon.QuestionMark }}
                     />
-
-
-
                   ) : item.isApiResult ? (
                     // For API results, default action is open in browser
                     <ActionPanel.Item

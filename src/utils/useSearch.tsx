@@ -87,8 +87,6 @@ export function useSearch(token: string, apiKey: string) {
           results = await getSearchResults(query, token, cancelRef.current.signal);
           setResults(results);
 
-          // Trigger FastGPT query
-          await queryFastGPT(query);
         } else {
           results = await getSearchResults(query, token, cancelRef.current.signal);
         }
