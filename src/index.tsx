@@ -2,12 +2,10 @@
 import {
   ActionPanel,
   closeMainWindow,
-  CopyToClipboardAction,
   getPreferenceValues,
   Icon,
   List,
   showToast,
-  ToastStyle,
   Detail
 } from "@raycast/api";
 import { getIcon } from "./utils/resultUtils";
@@ -132,10 +130,7 @@ export default function Command() {
                       title="Open in Browser"
                       shortcut={{ modifiers: ["cmd"], key: "enter" }}
                       onAction={async () => {
-                        // Add the item to history
                         await addHistory(item);
-                        // Open in browser using the appropriate URL
-                        // For regular queries, open as a search in Kagi
                         await open(`https://kagi.com/search?q=${encodeURIComponent(item.query)}`);
                         await closeMainWindow();
                       }}
@@ -148,7 +143,6 @@ export default function Command() {
                       shortcut={{ modifiers: ["cmd"], key: "?" }}
                       onAction={async () => {
                         await queryFastGPT(item.query);
-                        // Set the states to switch to FastGPT view
                         setFastGPTQuery(item.query);
                         setShowFastGPTView(true);
                         item.isFastGPT = true;
@@ -170,7 +164,6 @@ export default function Command() {
                     />
                   )}
                 </ActionPanel.Section>
-                {/* Rest of action panel sections */}
               </ActionPanel>
             }
           />
