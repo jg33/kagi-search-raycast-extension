@@ -130,6 +130,7 @@ export function useSearch(token: string, apiKey: string) {
 
     try {
       setIsLoading(true);
+      setSearchText(query);
       setFastGPTResult(null);
 
       let results: SearchResult[] = [];

@@ -5,7 +5,7 @@ export const getIcon = (item: SearchResult) => {
   if (item.isNavigation) {
     return Icon.Link;
   } else if (item.isApiResult) {
-    return Icon.Link;
+    return Icon.Globe;
 
   } else if (item.isFastGPT){
     return Icon.QuestionMark;

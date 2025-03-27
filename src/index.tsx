@@ -98,7 +98,7 @@ export default function Command() {
                         await open(item.url);
                         await closeMainWindow();
                       }}
-                      icon={{ source: Icon.ArrowRight }}
+                      icon={{ source: Icon.Globe }}
                     />
                   ) : item.query.includes("!")? (
                     <ActionPanel.Item
@@ -110,10 +110,9 @@ export default function Command() {
                         await open(item.url);
                         await closeMainWindow();
                       }}
-                      icon={{ source: Icon.ArrowRight }}
+                      icon={{ source: Icon.Exclamationmark }}
                     />
                     ) :
-
                     // For auto-suggest results, default action is search with API
                     <ActionPanel.Item
                       title="Search with Kagi API"
@@ -128,20 +127,48 @@ export default function Command() {
                   }
 
                   {/* Additional actions... */}
-                  <ActionPanel.Item
-                    title="Open in Browser"
-                    shortcut={{ modifiers: ["cmd"], key: "enter" }}
-                    onAction={async () => {
-                      // Add the item to history
-                      await addHistory(item);
-                      // Open in browser using the appropriate URL
-                      // For regular queries, open as a search in Kagi
-                      await open(`https://kagi.com/search?q=${encodeURIComponent(item.query)}`);
-                      await closeMainWindow();
-                    }}
-                    icon={{ source: Icon.Globe }}
-                  />
-
+                  {!(item.isApiResult || item.query.includes("!")) && (
+                    <ActionPanel.Item
+                      title="Open in Browser"
+                      shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                      onAction={async () => {
+                        // Add the item to history
+                        await addHistory(item);
+                        // Open in browser using the appropriate URL
+                        // For regular queries, open as a search in Kagi
+                        await open(`https://kagi.com/search?q=${encodeURIComponent(item.query)}`);
+                        await closeMainWindow();
+                      }}
+                      icon={{ source: Icon.Globe }}
+                    />
+                  )}
+                  {!(item.isFastGPT || item.query.includes("?")) && (
+                    <ActionPanel.Item
+                      title="Ask FastGPT"
+                      shortcut={{ modifiers: ["cmd"], key: "?" }}
+                      onAction={async () => {
+                        await queryFastGPT(item.query);
+                        // Set the states to switch to FastGPT view
+                        setFastGPTQuery(item.query);
+                        setShowFastGPTView(true);
+                        item.isFastGPT = true;
+                        await addHistory(item);
+                      }}
+                      icon={{ source: Icon.QuestionMark }}
+                    />
+                  )}
+                  {(
+                    <ActionPanel.Item
+                      title="Open First Result"
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                      onAction={async () => {
+                        await addHistory(item);
+                        await open(`https://kagi.com/search?q=${encodeURIComponent(item.query + " !")}`);
+                        await closeMainWindow();
+                      }}
+                      icon={{ source: Icon.Exclamationmark }}
+                    />
+                  )}
                 </ActionPanel.Section>
                 {/* Rest of action panel sections */}
               </ActionPanel>
