@@ -9,6 +9,8 @@ export const getIcon = (item: SearchResult) => {
 
   } else if (item.isFastGPT){
     return Icon.QuestionMark;
+  } else if (item.hasBang){
+    return Icon.Exclamationmark;
   }
   else {
     return Icon.MagnifyingGlass;

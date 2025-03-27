@@ -4,6 +4,7 @@ export interface SearchResult {
   description?: string;
   query: string;
   url: string;
+  hasBang?: boolean;
   isNavigation?: boolean;
   isHistory?: boolean;
   isApiResult?: boolean;

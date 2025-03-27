@@ -6,7 +6,6 @@ import {
   getPreferenceValues,
   Icon,
   List,
-  push,
   showToast,
   ToastStyle,
   Detail
@@ -63,7 +62,7 @@ export default function Command() {
       onSelectionChange={(id) => setSelectedItemId(id)}
       navigationTitle={searchText ? `Results for "${searchText}"` : "Kagi Search"}
     >
-      <List.Section title="Results" subtitle={listItems.length + ""}>
+      <List.Section title={searchText.length === 0 ? "History" : "Results"} subtitle={listItems.length + ""}>
         {listItems.map((item) => (
           <List.Item
             key={item.id}
@@ -79,7 +78,7 @@ export default function Command() {
                     <ActionPanel.Item
                       title="Ask FastGPT"
                       onAction={async () => {
-                        console.log("on fastgpt action")
+                        item.description = "Ask FastGPT: " + item.query;
                         await queryFastGPT(item.query);
                         // Set the states to switch to FastGPT view
                         setFastGPTQuery(item.query);
@@ -94,13 +93,27 @@ export default function Command() {
                     <ActionPanel.Item
                       title="Open in Browser"
                       onAction={async () => {
+                        item.description = "Open " + item.url.split("/")[2] + "in Browser";
                         await addHistory(item);
                         await open(item.url);
                         await closeMainWindow();
                       }}
                       icon={{ source: Icon.ArrowRight }}
                     />
-                  ) : (
+                  ) : item.query.includes("!")? (
+                    <ActionPanel.Item
+                      title="Open in Browser"
+                      onAction={async () => {
+                        item.description = "Use a Kagi bang with: " + item.query;
+                        item.hasBang = true;
+                        await addHistory(item);
+                        await open(item.url);
+                        await closeMainWindow();
+                      }}
+                      icon={{ source: Icon.ArrowRight }}
+                    />
+                    ) :
+
                     // For auto-suggest results, default action is search with API
                     <ActionPanel.Item
                       title="Search with Kagi API"
@@ -112,9 +125,23 @@ export default function Command() {
                       }}
                       icon={{ source: Icon.MagnifyingGlass }}
                     />
-                  )}
+                  }
 
                   {/* Additional actions... */}
+                  <ActionPanel.Item
+                    title="Open in Browser"
+                    shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                    onAction={async () => {
+                      // Add the item to history
+                      await addHistory(item);
+                      // Open in browser using the appropriate URL
+                      // For regular queries, open as a search in Kagi
+                      await open(`https://kagi.com/search?q=${encodeURIComponent(item.query)}`);
+                      await closeMainWindow();
+                    }}
+                    icon={{ source: Icon.Globe }}
+                  />
+
                 </ActionPanel.Section>
                 {/* Rest of action panel sections */}
               </ActionPanel>

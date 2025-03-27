@@ -1,5 +1,5 @@
 // src/utils/useSearch.tsx
-import { removeLocalStorageItem, setLocalStorageItem, showToast, ToastStyle } from "@raycast/api";
+import { removeLocalStorageItem, setLocalStorageItem, showToast, Toast } from "@raycast/api";
 import { AbortError } from "node-fetch";
 import { useState, useRef, useEffect } from "react";
 import { getSearchResults, getSearchHistory } from "./handleResults";
@@ -51,7 +51,7 @@ export function useSearch(token: string, apiKey: string) {
     await removeLocalStorageItem(HISTORY_KEY);
 
     setHistory([]);
-    showToast(ToastStyle.Success, "Cleared search history");
+    showToast(Toast.Style.Success, "Cleared search history");
   }
 
   async function deleteHistoryItem(result: SearchResult) {
@@ -65,7 +65,7 @@ export function useSearch(token: string, apiKey: string) {
     newHistory?.splice(index, 1);
     await setLocalStorageItem(HISTORY_KEY, JSON.stringify(newHistory));
     setHistory(newHistory);
-    showToast(ToastStyle.Success, "Removed from history");
+    showToast(Toast.Style.Success, "Removed from history");
   }
 
   // In src/utils/useSearch.tsx
@@ -81,15 +81,7 @@ export function useSearch(token: string, apiKey: string) {
       let results: SearchResult[] = [];
 
       if (query) {
-        // Check if query ends with a question mark to use FastGPT
-        if (query.trim().endsWith('?')) {
-          // Still get search results in background
-          results = await getSearchResults(query, token, cancelRef.current.signal);
-          setResults(results);
-
-        } else {
-          results = await getSearchResults(query, token, cancelRef.current.signal);
-        }
+        results = await getSearchResults(query, token, cancelRef.current.signal);
       }
 
       setIsLoading(false);
@@ -100,7 +92,7 @@ export function useSearch(token: string, apiKey: string) {
       }
 
       console.error("search error", error);
-      showToast(ToastStyle.Failure, "Could not perform search", String(error));
+      showToast(Toast.Style.Failure, "Could not perform search", String(error));
     }
   }
 
@@ -114,11 +106,10 @@ export function useSearch(token: string, apiKey: string) {
 
       const result = await searchWithFastGPT(query, apiKey, fastGPTCancelRef.current.signal);
       if (result) {
-        console.log("FastGPT result", result);
         setFastGPTResult(result);
       } else {
         setFastGPTResult(null);
-        showToast(ToastStyle.Failure, "No FastGPT results found");
+        showToast(Toast.Style.Failure, "No FastGPT results found");
       }
 
       setIsFastGPTLoading(false);
@@ -128,7 +119,7 @@ export function useSearch(token: string, apiKey: string) {
       }
 
       console.error("FastGPT error", error);
-      showToast(ToastStyle.Failure, "Could not query FastGPT", String(error));
+      showToast(Toast.Style.Failure, "Could not query FastGPT", String(error));
       setIsFastGPTLoading(false);
     }
   }
@@ -161,7 +152,7 @@ export function useSearch(token: string, apiKey: string) {
       }
 
       console.error("API search error", error);
-      showToast(ToastStyle.Failure, "Could not perform API search", String(error));
+      showToast(Toast.Style.Failure, "Could not perform API search", String(error));
       return [];
     }
   }
